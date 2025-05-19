@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Library</title>
+  <style>
+    body {
+      background-color: #0a0a0a;
+      color: #33ff33;
+      font-family: 'Courier New', monospace;
+      margin: 0;
+      padding: 0;
+    }
+
+    header {
+      padding: 20px;
+      text-align: center;
+      border-bottom: 1px solid #222;
+      background: rgba(0, 0, 0, 0.9);
+    }
+
+    h1.glitch {
+      font-size: 2.5rem;
+      position: relative;
+      display: inline-block;
+      color: #33ff33;
+      animation: glitch 1s infinite;
+    }
+
+    h1.glitch::before,
+    h1.glitch::after {
+      content: attr(data-text);
+      position: absolute;
+      left: 0;
+      top: 0;
+      opacity: 0.7;
+    }
+
+    h1.glitch::before {
+      color: red;
+      transform: translate(-2px, -2px);
+      z-index: -1;
+    }
+
+    h1.glitch::after {
+      color: blue;
+      transform: translate(2px, 2px);
+      z-index: -1;
+    }
+
+    @keyframes glitch {
+      0% { transform: translate(0); }
+      20% { transform: translate(-2px, 2px); }
+      40% { transform: translate(2px, -2px); }
+      60% { transform: translate(-1px, 1px); }
+      80% { transform: translate(1px, -1px); }
+      100% { transform: translate(0); }
+    }
+
+    main {
+      padding: 30px;
+      max-width: 1400px;
+      margin: auto;
+      display: flex;
+      gap: 30px;
+    }
+
+    .text-column {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .media-section {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .book-entry {
+      background-color: rgba(255, 255, 255, 0.05);
+      padding: 20px;
+      border-left: 3px solid #33ff33;
+    }
+
+    .book-entry h2 {
+      margin: 0 0 10px 0;
+      font-size: 1.3rem;
+      color: #fff;
+    }
+
+    .book-entry p {
+      font-size: 0.95rem;
+      color: #99ff99;
+      line-height: 1.5;
+    }
+
+    .encoded {
+      font-family: monospace;
+      background-color: #111;
+      color: #33ffff;
+      padding: 10px;
+      overflow-x: auto;
+      margin-top: 10px;
+    }
+
+    .custom-image {
+      width: 100%;
+      height: auto;
+      max-height: 400px;
+      object-fit: cover;
+      border: 1px solid #33ff33;
+      filter: grayscale(100%) brightness(0.8) contrast(1.2);
+    }
+
+    .poem {
+      background-color: rgba(255, 255, 255, 0.05);
+      padding: 20px;
+      border-left: 3px solid #33ff33;
+      font-style: italic;
+      color: #99ff99;
+      line-height: 1.6;
+      max-width: 800px;
+      margin: auto;
+    }
+
+    .placeholder {
+      border: 1px dashed #33ff33;
+      height: 250px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #33ff33;
+    }
+		/* Efeito Glitch */
+	.glitch {
+	  position: relative;
+	  color: #fff;
+	  font-weight: bold;
+	  animation: glitch-skew 1s infinite linear alternate-reverse;
+	}
+
+	.glitch::before,
+	.glitch::after {
+	  content: attr(data-text);
+	  position: absolute;
+	  left: 0;
+	  width: 100%;
+	  overflow: hidden;
+	  color: #f0f;
+	  clip: rect(0, 0, 0, 0);
+	}
+
+	.glitch::before {
+	  animation: glitch-anim-1 2s infinite linear alternate-reverse;
+	  color: #f00;
+	}
+
+	.glitch::after {
+	  animation: glitch-anim-2 3s infinite linear alternate-reverse;
+	  color: #0ff;
+	}
+
+	@keyframes glitch-skew {
+	  0% { transform: skew(0deg); }
+	  20% { transform: skew(5deg); }
+	  40% { transform: skew(-5deg); }
+	  60% { transform: skew(3deg); }
+	  80% { transform: skew(-3deg); }
+	  100% { transform: skew(0deg); }
+	}
+
+	@keyframes glitch-anim-1 {
+	  0% { clip: rect(0, 9999px, 0, 0); transform: translate(-2px, -2px); }
+	  20% { clip: rect(10px, 9999px, 20px, 0); transform: translate(2px, 2px); }
+	  40% { clip: rect(5px, 9999px, 15px, 0); transform: translate(-2px, 1px); }
+	  60% { clip: rect(15px, 9999px, 25px, 0); transform: translate(1px, -1px); }
+	  80% { clip: rect(0, 9999px, 10px, 0); transform: translate(-1px, 1px); }
+	  100% { clip: rect(5px, 9999px, 15px, 0); transform: translate(0, 0); }
+	}
+
+	@keyframes glitch-anim-2 {
+	  0% { clip: rect(0, 9999px, 0, 0); transform: translate(2px, 2px); }
+	  20% { clip: rect(15px, 9999px, 25px, 0); transform: translate(-2px, -2px); }
+	  40% { clip: rect(10px, 9999px, 20px, 0); transform: translate(1px, 1px); }
+	  60% { clip: rect(0, 9999px, 10px, 0); transform: translate(-1px, 2px); }
+	  80% { clip: rect(5px, 9999px, 15px, 0); transform: translate(2px, -1px); }
+	  100% { clip: rect(10px, 9999px, 20px, 0); transform: translate(0, 0); }
+	}
+
+    footer {
+      text-align: center;
+      padding: 20px;
+      font-size: 0.8rem;
+      border-top: 1px solid #222;
+      color: #444;
+      margin-top: 40px;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1 class="glitch" data-text="Library">Library</h1>
+  </header>
+
+  <main>
+    <!-- Coluna Esquerda: Textos menores -->
+    <div class="text-column">
+      <div class="book-entry">
+        <h2>📘 Codex Fragment #13</h2>
+        <p>“Nihil est verum. Omnia sunt permissa.”  
+        (Nothing is true. Everything is permitted.)</p>
+        <div class="encoded">
+          byBsb2dpbiDDqSBvIG5vbWUgZGFxdWVsZSBxdWUgY29tZcOnb3UgY29tIG9zIHNlZ3JlZG9zIQ==
+        </div>
+      </div>
+
+      <div class="book-entry">
+        <h2>🧩The next episode is: WAR!#12</h2>
+        
+        <div class="encoded">
+          --- / ... . --. .-. . -.. --- / --- / .- --. ..- .- .-. -.. .- / -.. . -. - .-. --- / -.. --- / .--. --- . -- .-
+        </div>
+      </div>
+	  
+	  <div class="book-entry">
+        <h2>📙 Your comments here!#42</h2>
+        <p> ?Δ$E407.</p>
+        <div class="encoded">
+		User#Wannahavefun say's:
+		
+          01010100 01101000 01101001 01110011 00100000 01101001 01110011 00100000 01101010 01110101 01110011 01110100 00100000 01100001 00100000 01110010 01100101 01100100 00100000 01101000 01100101 01110010 01110010 01101001 01101110 01100111 00101100 00100000 01001001 00100111 01101101 00100000 01110011 01101111 01110010 01110010 01111001 00100001 00100000 01000010 01110101 01110100 00100000 01100100 01101111 01101110 00100111 01110100 00100000 01100111 01101001 01110110 01100101 00100000 01110101 01110000 00100000 00010100 00100000 01100101 01110110 01100101 01110010 01111001 01110100 01101000 01101001 01101110 01100111 00100000 01111001 01101111 01110101 00100000 01101110 01100101 01100101 01100100 00100000 01101001 01110011 00100000 01110010 01101001 01100111 01101000 01110100 00100000 01100010 01100101 01100110 01101111 01110010 01100101 00100000 01111001 01101111 01110101 01110010 00100000 01100101 01111001 01100101 01110011 00101110 
+        </div>
+      </div>
+
+      <div class="poem">
+        <h2>📜 Ultima Carta</h2>
+       <div style="font-style: italic; color: #99ff99;">
+          <p>Minha amada,<br></br>
+
+				Se esta carta te alcançar, é porque o tempo, com sua fome silenciosa, decidiu levar de mim o que ainda restava.<br></br>
+				Não chore agora, amor meu, pois escrevo com a calma de quem viu a morte e aprendeu a conversar com ela.<br></br><br></br>
+				
+				Lembro do sol se pondo atrás da colina, no dia em que prometi voltar.<br></br>
+				Você segurava minha mão como se pudesse impedir o mundo de girar.<br></br>
+				E eu quase acreditei que o amor era mais forte que o tempo — talvez fosse, se o tempo nos desse mais tempo.<br></br><br></br>
+
+				Você me dizia sempre: “cuidado, meu amor”, e eu ria, como quem acha que o destino é só uma palavra.<br></br>
+				Mas hoje percebo que cada “cuidado” seu era uma âncora — algo que me prendia ao que sou. Ao que fomos.<br></br><br></br>
+
+				Penso, agora, no filho que sonhamos ter.<br></br>
+				Naquele quarto ainda vazio.<br></br>
+				Você sorrindo, perguntando se seria menino ou menina.<br></br>
+				Eu dizia: “se for menino, terá seus olhos. Se for menina, seu coração.”<br></br>
+				Você me corrigia: “terá os sonhos dele e os dele serão os nossos.”<br></br><br></br>
+
+				Lembro que escolhemos um nome.<br></br>
+				Demos a ele o peso de um futuro.<br></br>
+				Tão cheio de promessas...<br></br>
+				Hoje, penso se esse nome vive ainda em seus pensamentos, como vive em mim.<br></br><br></br>
+
+				Talvez nunca tenhamos nosso filho, meu amor.<br></br>
+				Ou talvez, em algum lugar que não entendo, ele nos aguarde.<br></br>
+				A vida não é uma linha reta — é um eco, e talvez o escutemos outra vez.<br></br><br></br>
+
+				Ao te escrever, ouço os sons ao redor diminuírem.<br></br>
+				Como se tudo ao meu redor compreendesse que este é o fim.<br></br>
+				Mas não é o fim daquilo que fomos — o que vivemos é eterno, porque foi real.<br></br><br></br>
+
+				Guarde bem esta carta.<br></br>
+				Ela contém mais que palavras — contém o que restou de mim.<br></br>
+				E quando te perguntarem sobre mim, diga que lutei por um sonho.<br></br>
+				Diga que minha maior batalha foi me afastar de você para que um dia pudéssemos nos reencontrar.<br></br><br></br>
+
+				A chave para tudo, minha amada,<br></br>
+				está no nome que demos à esperança.<br></br>
+				Na ternura dos seus olhos.<br></br>
+				No toque das suas mãos.<br></br>
+				No silêncio entre dois corações que aprenderam a falar sem palavras.<br></br><br></br>
+
+				Se por ventura olhar o pôr do sol sozinha algum dia,<br></br>
+				lembre-se: estarei lá, me aproximando devagar, com o mesmo olhar que te escolheu desde o começo.<br></br><br></br>
+
+				Com amor eterno,
+				Teu.</p>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Coluna Direita: Imagens e quadros -->
+    <div class="media-section">
+      <div class="book-entry">
+        <h2>🖼️ Lamentatio</h2>
+        <p>The image conveys a message of pain, but there is something hidden within its composition...</p>
+        <img src="thelament.png" alt="The Lament" class="custom-image"/>
+      </div>
+
+      <div class="book-entry">
+        <h2>🖼️  Iter ad finem </h2>
+        <p>Learning to read and interpret what you seek will lead you to the answers you’re looking for...</p>
+        <img src="caminho.png" alt="Caminho" class="custom-image"/>
+      </div>
+
+      <div class="book-entry">
+        <h2>🖼️ Familia </h2>
+        <img src="fall.jpg" alt="Fall" class="custom-image"/>
+      </div>
+	  
+	  <div class="book-entry">
+        <h2>📙 Your comments here!#43</h2>
+        <p> ?Δ$E407.</p>
+        <div class="encoded">
+		User#SpyfromRome say's:
+         Thought of the day: Why do people always use their birthdates as passwords? It's so easy to figure out!
+        </div>
+      </div>
+
+      <div class="book-entry">
+        <h2>🖼️ Dux Princeps </h2>
+        <img src="caesar.jpeg" alt="julius" class="custom-image"/>
+      </div>
+	  
+	   <div class="text-column">
+      <div class="book-entry">
+        <h2>📘 Codex Fragment #17</h2>
+        <p>“Nihil est verum. Omnia sunt permissa.”  
+        (Nothing is true. Everything is permitted.)</p>
+        <div class="encoded">
+          T3Mgc2VncmVkb3MgZXN0w6NvIGRpYW50ZSBkb3Mgc2V1cyBvbGhvcw==
+        </div>
+      </div>
+	  <div class="book-entry">
+        <h2>🧩Maybe this can help you!#1</h2>
+        
+        <div class="encoded">
+          --- / ... . --. .-. . -.. --- / --- / .- --. ..- .- .-. -.. .- / -.. . -. - .-. --- / -.. --- / .--. --- . -- .-
+        </div>
+      </div>
+	  <div class="book-entry">
+		  <a href="https://imgur.com/SHGN9rr" target="_blank" rel="noopener noreferrer">
+			🔗 CLICK HERE CLICK HERE CLICK HERE!
+		  </a>
+	</div>
+
+    </div>
+  </main>
+<!-- outros conteúdos -->
+
+	<a href="https://imgur.com/dH6ojYr" target="_blank"style="position:fixed; bottom:5px; right:10px; color:#3b3a39;font-size:12px; text-decoration:none; z-index:9999;">here?</a>
+
+
+
+  <footer class="glitch" data-text="&copy; 2025 -kiroshi./exe. DaedalusLabyrinth v0.0.1">&copy; 2025 -kiroshi./exe. DaedalusLabyrinth v0.0.1</footer>
+	
+
+</body>
+</html>

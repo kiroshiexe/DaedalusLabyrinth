@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Daedalus Labyrinth</title>
+  <!-- Importação da fonte monoespaçada estilo terminal -->
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+  <style>
+	    /* ===== Reset global e fonte padrão ===== */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Share Tech Mono', monospace;
+    }
+
+    /* ===== Estilo do body e container principal ===== */
+    body {
+      background-color: #000;
+      color: #00ff00;
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    /* ===== Container de background (camada atrás do terminal) ===== */
+    .background {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      z-index: 0;
+    }
+
+    /* ===== Efeito de texto binário animado ===== */
+    .binary {
+      position: absolute;
+      top: -100%;
+      left: 0;
+      width: 100%;
+      height: 200%;
+      color: #0f0;
+      font-size: 18px;
+      line-height: 1.2;
+      white-space: pre;
+      opacity: 0.1;
+      animation: scroll 20s linear infinite;
+    }
+
+    @keyframes scroll {
+      /* Animação de translação vertical para efeito de queda */
+      to { transform: translateY(100%); }
+    }
+
+    /* ===== Estilo do terminal (janela principal) ===== */
+    .terminal {
+      position: relative;
+      z-index: 1;
+      background: rgba(0, 0, 0, 0.8);
+      border: 1px solid #0f0;
+      padding: 20px;
+      width: 95%;
+      max-width: 1100px;
+      height: 550px;
+      overflow-y: auto;
+      border-radius: 5px;
+      box-shadow: 0 0 10px #0f0;
+    }
+
+    /* ===== Título do terminal com efeito glitch ===== */
+    .terminal h1 {
+      font-size: 24px;
+      margin-bottom: 10px;
+      text-shadow: 0 0 5px #0f0;
+      animation: glitch 2s infinite;
+    }
+
+    @keyframes glitch {
+      /* Variações de sombra para simular glitch */
+      0%, 100% { text-shadow: 2px 0 red, -2px 0 blue; }
+      25% { text-shadow: -2px 0 lime, 2px 0 cyan; }
+      50% { text-shadow: 2px 2px magenta, -2px -2px yellow; }
+      75% { text-shadow: -1px 1px #0f0, 1px -1px #0ff; }
+    }
+
+    /* ===== Personalização da scrollbar estilo terminal ===== */
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #0f0;
+    }
+    ::-webkit-scrollbar-track {
+      background: #000;
+    }
+
+    /* ===== Área de input com prompt ===== */
+    .input-area {
+      display: flex;
+      align-items: center;
+      margin-top: 10px;
+    }
+
+    /* Input de texto transparente e sem borda */
+    .input-area input {
+      background: transparent;
+      border: none;
+      color: #00ff00;
+      width: 100%;
+      font-size: 18px;
+      padding: 5px;
+      outline: none;
+    }
+    .input-area input::placeholder {
+      color: #00ff00;
+    }
+
+    /* ===== Botões de opções no menu ===== */
+    .options {
+      margin-top: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+    .option-btn {
+      background: transparent;
+      color: #00ff00;
+      border: 1px solid #00ff00;
+      padding: 6px 10px;
+      cursor: pointer;
+      font-size: 16px;
+      transition: background-color 0.3s, color 0.3s;
+    }
+    .option-btn:hover {
+      background-color: #00ff00;
+      color: #000;
+    }
+
+    /* ===== Cursor piscante no prompt ===== */
+    .cursor-blink::after {
+      content: '|';
+      animation: blink 1s steps(2, start) infinite;
+      margin-left: 4px;
+    }
+    @keyframes blink {
+      to { visibility: hidden; }
+    }
+  </style>
+</head>
+<body>
+  <!-- ===== Background animado (inserir binários aqui) ===== -->
+  <!-- <div class="background">
+    <pre class="binary">...seu texto binário...</pre>
+  </div> -->
+
+  <!-- ===== Terminal container ===== -->
+  <div class="terminal">
+    <!-- Cabeçalho com prompt inicial e comando ./start -->
+    <h1>Daedalus@kali:~# ./start</h1>
+    <!-- Área de saída de texto das interações -->
+    <div id="output">
+      <p>Welcome to the system!</p>
+      <p>Type 'enter' to begin.</p>
+    </div>
+
+    <!-- Área de input para comandos do usuário -->
+    <div class="input-area">
+      <span class="prompt cursor-blink">Daedalus@kali:~#</span>
+      <input type="text" id="commandInput" placeholder="Enter a command..." autofocus />
+    </div>
+  </div>
+
+  <script>
+    // ===== Seleção de elementos do DOM =====
+    const inputField = document.getElementById("commandInput");
+    const outputArea = document.getElementById("output");
+
+    // ===== Variáveis de estado =====
+    let waitingForExitConfirmation = false; // Flag de confirmação de saída
+    let questionsAsked = 0;                 // Contagem de perguntas no modo Help
+    let helpMode = false;                   // Flag indicando se está no modo Help
+    let countdownInterval;                  // Referência ao setInterval do timer
+    let countdownTimer = 180;               // Contador de 3 minutos em segundos
+    let currentWindow = 'primary';          // Janela/seção atual
+	let loginStage = 0; // 0 = não logado, 1 = esperando usuário, 2 = esperando senha, 3 = logado
+	const fakeUsername = "admin";
+	const fakePassword = "1234";
+
+
+    // ===== Perguntas e respostas do modo Help =====
+    const questionsAndAnswers = {
+      "What is the secret of the Library?": "The laments of those who are gone point the way to the key!",
+      "How to overcome this challenge?": "If you try hard, you can succeed, especially in the shadows!",
+      "What is the key to the secret?": "Escape the Labyrinth alive!",
+      "Who was Caesar?": "Which Caesar are we talking about?",
+      "What does it mean to be alive?": "Not being dead.",
+      "What is the meaning of life?": "It depends on what life means to you. Faith? Money? Hope? There's no single answer. We define our own meaning. I'd say: to find more happy days!",
+      "How many steps do I need to reach the end?": "That depends on where you are. It could be 1, 2, 3... 4 is unlikely!",
+      "I’m lost, help me!": "Be persistent. Caesar guided Rome. His books and history held the key to solving problems.",
+      "Give me a clue!": "He's his son!",
+      "Who are they???": ".........\n.....\n...\nI can't say that!"
+    };
+
+    // ===== Listener para captura da tecla Enter =====
+    inputField.addEventListener("keydown", function (event) {
+      if (event.key === "Enter") {
+        const command = inputField.value.trim().toLowerCase();
+        inputField.value = ""; // Limpa o campo após leitura
+
+        // --- Tratamento de confirmação de saída ---
+        if (waitingForExitConfirmation) {
+          if (command === "y") {
+            outputArea.innerHTML = "<p>Exiting... Reloading interface.</p>";
+            setTimeout(() => window.location.reload(), 1000);
+          } else if (command === "n") {
+            outputArea.innerHTML += "<p>Exit canceled. Returning to menu...</p>";
+            waitingForExitConfirmation = false;
+            loadMainMenu();
+          } else {
+            outputArea.innerHTML += "<p>Invalid input. Type 'y' to confirm exit or 'n' to cancel.</p>";
+          }
+          return;
+        }
+
+        // --- Seção Final Challenge ---
+        if (currentWindow === 'final') {
+          handleFinal(command);
+          return;
+        }
+
+        // --- Modo Help: tratamento de perguntas ---
+        if (helpMode) {
+          // Voltar ao menu
+          if (command === "back" || command === "exit") {
+            loadMainMenu();
+            return;
+          }
+          // Limite de 3 perguntas
+          if (questionsAsked < 3) {
+            const keys = Object.keys(questionsAndAnswers);
+            const idx = parseInt(command) - 1;
+            if (idx >= 0 && idx < keys.length) {
+              outputArea.innerHTML += `<p>Q: ${keys[idx]}</p>`;
+              outputArea.innerHTML += `<p>R: ${questionsAndAnswers[keys[idx]]}</p><br>`;
+              questionsAsked++;
+              if (questionsAsked === 3) {
+                outputArea.innerHTML += "<h2 style='text-align:center'>---- THEY'RE WATCHING YOU ----</h2>";
+                outputArea.innerHTML += "<p>You've reached the maximum question limit. Type 'back' to return.</p>";
+              }
+            } else {
+              outputArea.innerHTML += "<p>Invalid question number. Type a valid number from 1 to 10.</p>";
+            }
+          } else {
+            outputArea.innerHTML += "<p>You've used all 3 questions. Type 'back' to return to the menu.</p>";
+          }
+          return;
+        }
+
+        // --- Comandos do menu principal ---
+        switch (command) {
+          case "enter":
+            clearTerminal();
+            loadMainMenu();
+            break;
+          case "exit":
+            outputArea.innerHTML += "<p>Are you sure you want to exit? (y/n)</p>";
+            waitingForExitConfirmation = true;
+            break;
+          case "library":
+            loadLibrary();
+            break;
+          case "help":
+            loadHelp();
+            break;
+          case "about us":
+            loadAbout();
+            break;
+          case "final challenge":
+            loadFinalChallenge();
+            break;
+          case "clear":
+            clearTerminal();
+            outputArea.innerHTML = "<p>Screen cleared.</p><br> <p>Type 'exit' to go back to start or 'back' to return to main menu.</p>";
+            break;
+          case "menu":
+          case "back":
+            loadMainMenu();
+            break;
+          default:
+            outputArea.innerHTML += `<p>$ ${command}: Command not found.</p>`;
+        }
+      }
+    });
+
+    // ===== Funções auxiliares =====
+    function clearTerminal() {
+      outputArea.innerHTML = '';
+    }
+
+    function loadMainMenu() {
+      currentWindow = 'menu';
+      helpMode = false;
+      clearTerminal();
+      outputArea.innerHTML += "<p>Welcome to the terminal interface!</p>";
+      outputArea.innerHTML += "<p>If you have any problem type 'clear' and 'back' that will be fix your problem!</p>";
+      outputArea.innerHTML += "<p>Select an option by clicking the buttons below or typing your desired option in the console:</p>";
+
+      const optionsDiv = document.createElement('div');
+      optionsDiv.classList.add('options');
+      const buttons = [
+        { text: "Library", action: loadLibrary },
+        { text: "Help", action: loadHelp },
+        { text: "About Us", action: loadAbout },
+        { text: "Final Challenge", action: loadFinalChallenge },
+        { text: "Exit", action: () => { outputArea.innerHTML += "<p>Are you sure you want to exit? (y/n)</p>"; waitingForExitConfirmation = true; } }
+      ];
+      buttons.forEach(btn => {
+        const b = document.createElement('button');
+        b.classList.add('option-btn');
+        b.textContent = btn.text;
+        b.onclick = btn.action;
+        optionsDiv.appendChild(b);
+      });
+      outputArea.appendChild(optionsDiv);
+    }
+
+	function loadLibrary() {
+		currentWindow = 'library';
+		fakeLoading(() => {
+		outputArea.innerHTML += `
+			<p>Library section loaded. Access the 
+			<a href="library.html" target="_blank" style="text-decoration: underline; color: #00ff00;">Library</a>.</p>
+			<p>Type 'back' to return, 'clear' to clean the screen or 'exit' to quit.</p>
+			`;
+		  });
+		}
+
+
+
+	function loadHelp() {
+		currentWindow = 'help';
+		helpMode = true;
+		questionsAsked = 0;
+
+		fakeLoading(() => {
+		outputArea.innerHTML += "<p>---- YOU HAVE 3 QUESTIONS ----</p><p>------ USE THEM WISELY ------</p><p>Select a question (1-10):</p>";
+			for (let i = 1; i <= 10; i++) {
+			  outputArea.innerHTML += `<p>${i} - ${Object.keys(questionsAndAnswers)[i - 1]}</p>`;
+			}
+			outputArea.innerHTML += "<p>Type the number of your question.</p>";
+
+			countdownTimer = 180;
+			outputArea.innerHTML += "<p>Time left: <span id='countdown'>180</span> seconds</p><br>";
+			countdownInterval = setInterval(() => {
+			  countdownTimer--;
+			  document.getElementById("countdown").textContent = countdownTimer;
+			  if (countdownTimer <= 0) {
+				clearInterval(countdownInterval);
+				outputArea.innerHTML += "<p>Time's up! Returning to menu.</p>";
+				loadMainMenu();
+			  }
+			}, 1000);
+		  });
+		}
+
+
+	function loadAbout() {
+	  currentWindow = 'about';
+	  fakeLoading(() => {
+		outputArea.innerHTML += `<p>About Us section loaded.</p>
+		  <p>Type 'back' to return, 'clear' to clean the screen or 'exit' to quit.</p>
+		  <p>To learn more, click <a href="aboutus.html" target="_blank" style="text-decoration: underline; color: #0af;">here</a>.</p>`;
+	  });
+	}
+
+
+
+	function loadFinalChallenge() {
+		currentWindow = 'final';
+		loginStage = 1;
+		fakeLoading(() => {
+		outputArea.innerHTML += "<p>--- Final Challenge Login ---</p>";
+		outputArea.innerHTML += "<p>Enter username:</p>";
+		  });
+		}
+
+	function handleFinal(command) {
+		if (loginStage === 1) {  // esperando username
+		if (command === fakeUsername) {
+		  loginStage = 2;
+		  outputArea.innerHTML += "<p>Username accepted. Enter password:</p>";
+		} else {
+		  outputArea.innerHTML += "<p>Invalid username. Try again:</p>";
+		}
+	  } else if (loginStage === 2) {  // esperando senha
+		if (command === fakePassword) {
+		  loginStage = 3;
+		  showFinalChallengeContent();
+		} else {
+		  outputArea.innerHTML += "<p>Invalid password. Try again:</p>";
+		}
+	  } else if (loginStage === 3) { // já logado, comandos normais na seção final
+		if (command === 'back') {
+		  loginStage = 0;
+		  loadMainMenu();
+		} else if (command === 'clear') {
+		  clearTerminal();
+		  showFinalChallengeContent();
+		} else if (command === 'exit') {
+		  waitingForExitConfirmation = true;
+		  outputArea.innerHTML += "<p>Are you sure you want to exit? (y/n)</p>";
+		} else {
+		  outputArea.innerHTML += "<p>Invalid command. Type 'back' to return, 'clear' to clean the screen, or 'exit' to quit.</p>";
+		}
+	  }
+	}
+
+	function showFinalChallengeContent() {
+        outputArea.innerHTML = "<p>Welcome to the Final Challenge!</p>";
+        outputArea.innerHTML += "<p>Your mission: Solve the secret encryption below:</p>";
+        outputArea.innerHTML += "<p>/////////////////////////////////////////////////////////////////////////////</p>";
+        outputArea.innerHTML += "<p>Ywaexgvcogivmoojgsqumlxszwmrmabwatug,aqmfmvmuawcslqsr gmlcrrhgaoejgga.</p>";
+        outputArea.innerHTML += "<p>— XibngzHrrhct,QHfgwugmSokkcdvMwvviui</p>";
+        outputArea.innerHTML += "<p>/////////////////////////////////////////////////////////////////////////////</p>";
+        outputArea.innerHTML += "<p>When you discover the secret, report it to the administrator.</p>";
+        outputArea.innerHTML += "<p>Type 'back' to return, 'clear' to clean the screen, or 'exit' to quit.</p>";
+      
+    }
+	function fakeLoading(callback) {
+	  clearTerminal();
+	  outputArea.innerHTML = "<p>Loading...</p>";
+	  setTimeout(() => {
+		clearTerminal();
+		callback();
+	  }, 1500); // 1.5 segundos de delay
+	}
+
+  </script>
+</body>
+</html>
